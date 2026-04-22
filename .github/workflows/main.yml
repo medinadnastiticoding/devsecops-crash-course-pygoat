@@ -41,4 +41,4 @@ jobs:
       run: pip install bandit
 
     - name: Run Bandit Scan
-      run: bandit -r . # "-r" scans everything in current folder hence why using dot sign "."
+      run: bandit -ll -ii -r . # "-r" scans everything in current folder hence why using dot sign "."
