@@ -1,23 +1,44 @@
-name: Pylint
+# A workflow is a configurable automated process
+# It will defined in .github/ workflow directory in current repository
+# github will detect the pipeline code and run the defined jobs
 
-on: [push]
+# (!) understanding concepts more important than specific tools implementations since sec. tools are very similar which makes them works pretty much the same
+# choosing sec. tools in general, need to consider some criteria: 1. adoption (used in large community / contributors, many resources / docs, is it open-source so you're not alone when using it), 2. complexity (is it easy to use? is it official docker image?)
+# can also use multiple tools (2-3 tools) for same job  for sast scanning, usefull for comparing results and to achieve full coverage of vulnerabilities that other tool may not able to detect
 
+# name = naming the workflow, for now is to create CI pipeline - SAST scan
+name: CI
+
+# on = when will this pipeline will be triggered
+# example if wants to trigger it in certain branches
+# on:
+#   push:
+#       brances:
+#       - main
+#       - feature/xx
+# on: push # to trigger pipeline when a push is made to any branch in the repository
+# on: [push, ...] # to specify multiple trigger events when using bracket
+on: [push] # to trigger this code whenever a new push is commited
+
+# jobs = grouping together all the jobs that run in the CI workflow
+# each jobs is executed on a fresh new environment hosted by github machine, the OS needs to be installed and the tools also need to be installed based on the OS  
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.8", "3.9", "3.10"]
+  # will using Bandit, a popular sec. tool for python and it also easy to use
+  sast_scan:
+    name: Run Bandit # give description
+    runs-on: ubuntu-latest # specify the OS machine
+
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
+    - name: Checkout code
+      uses: actions/checkout@v2 # "/actions" reusable actions are hosted
+      
+    - name: Set up Python
+      uses: actions/setup-python@v2
       with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install pylint
-    - name: Analysing the code with pylint
-      run: |
-        pylint $(git ls-files '*.py')
+        python-version: 3.8 # specify tool version, can be via marketplace/search
+
+    - name: Install Bandit
+      run: pip install bandit
+
+    - name: Run Bandit Scan
+      run: bandit -r . # "-r" scans everything in current folder hence why using dot sign "."
